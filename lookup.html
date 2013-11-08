@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans" />
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.2/css/font-awesome.min.css" >
     <link rel="stylesheet" href="//webfinger.net/css/style.css" />
     <link rel="stylesheet" href="/css/prettify.css" />
     <script src="/js/run_prettify.js"></script>
     <style>
-      #resource {
-        width: 50%;
-      }
       #logs {
         font-family: monospace;
         list-style: none;
@@ -26,24 +26,38 @@
         border: none;
       }
     </style>
+    <base href="//webfinger.net">
   </head>
   <body>
     <header>
       <div>
-        <a href="//webfinger.net/">
-          <img src="http://webfinger.github.io/assets/logo/WebFinger.svg" id="logo" />
-          <h1>WebFinger</h1>
-        </a>
-        <p id="tagline">simple discovery for the web</p>
+        <div class="site-title">
+          <a href="/">
+            <img src="http://webfinger.github.io/assets/logo/WebFinger.svg" id="logo" />
+            <h1>WebFinger</h1>
+          </a>
+          <p id="tagline">simple discovery for the web</p>
+        </div>
+
+        <form class="lookup" method="get" autocomplete="on">
+          <h3>Lookup WebFinger:</h3>
+          <input type="text" name="resource" id="resource" value="{{ .Resource }}" placeholder="Email or URL" tabindex="1"/>
+          <button tabindex="2"><i class="fa fa-search"></i></button>
+        </form>
       </div>
     </header>
-    <div id="content">
-      <form action="" method="GET">
-        Lookup webfinger for:
-        <input type="text" name="resource" id="resource" value="{{ .Resource }}" />
-        <input type="submit" value="Submit" />
-      </form>
 
+    <nav role="navigation" id="nav">
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="http://tools.ietf.org/html/rfc7033" rel="external">Spec</a></li>
+        <li><a href="/code/">Code</a></li>
+        <li><a href="/rel/">Link Relations</a></li>
+        <li><a href="/community/">Community</a></li>
+      </ul>
+    </nav>
+
+    <div id="content">
       {{ if .Logs }}
         <h3>Request Log</h3>
         <ul id="logs">{{range .Logs}}
