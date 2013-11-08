@@ -23,12 +23,16 @@ import (
 
 	"appengine"
 	"appengine/urlfetch"
-	"github.com/ant0ine/go-webfinger"
+	webfinger "github.com/ant0ine/go-webfinger"
 	"github.com/gorilla/context"
 )
 
 var (
 	lookupTemplate = template.Must(template.ParseFiles("lookup.html"))
+)
+
+const (
+	webfingerHome = "http://webfinger.net/"
 )
 
 // logCatcher implements the io.Writer interface, writing all bytes to a string
@@ -57,17 +61,20 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 	var jrd string
 
 	input := r.FormValue("resource")
-	if input != "" {
-		j, err := client.Lookup(input, nil)
+	if input == "" {
+		http.Redirect(w, r, webfingerHome, http.StatusFound)
+		return
+	}
+
+	j, err := client.Lookup(input, nil)
+	if err != nil {
+		log.Printf("Error getting JRD: %v", err.Error())
+	} else {
+		bytes, err := json.MarshalIndent(j, "", "  ")
 		if err != nil {
-			log.Printf("Error getting JRD: %v", err.Error())
+			log.Printf("Error marshalling JRD: %v", err.Error())
 		} else {
-			bytes, err := json.MarshalIndent(j, "", "  ")
-			if err != nil {
-				log.Printf("Error marshalling JRD: %v", err.Error())
-			} else {
-				jrd = string(bytes)
-			}
+			jrd = string(bytes)
 		}
 	}
 
@@ -88,7 +95,7 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 func init() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// redirect homepage to /lookup
-		http.Redirect(w, r, "/lookup", http.StatusFound)
+		http.Redirect(w, r, webfingerHome, http.StatusFound)
 	})
 	http.HandleFunc("/lookup", lookup)
 }
