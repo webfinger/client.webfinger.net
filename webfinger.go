@@ -23,6 +23,7 @@ import (
 
 	"appengine"
 	"appengine/urlfetch"
+
 	webfinger "github.com/ant0ine/go-webfinger"
 	"github.com/gorilla/context"
 )
@@ -94,7 +95,7 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// redirect homepage to /lookup
+		// redirect "/" to webfinger.net
 		http.Redirect(w, r, webfingerHome, http.StatusFound)
 	})
 	http.HandleFunc("/lookup", lookup)
