@@ -33,7 +33,7 @@ var (
 )
 
 const (
-	webfingerHome = "http://webfinger.net/"
+	webfingerHome = "https://webfinger.net/"
 )
 
 // logCatcher implements the io.Writer interface, writing all bytes to a string
