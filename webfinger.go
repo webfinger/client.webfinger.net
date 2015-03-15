@@ -21,11 +21,10 @@ import (
 	"net/http"
 	"os"
 
-	"appengine"
-	"appengine/urlfetch"
-
 	webfinger "github.com/ant0ine/go-webfinger"
 	"github.com/gorilla/context"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/urlfetch"
 )
 
 var (
