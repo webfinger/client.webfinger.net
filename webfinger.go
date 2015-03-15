@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"html/template"
 	"log"
@@ -22,7 +23,6 @@ import (
 	"os"
 
 	webfinger "github.com/ant0ine/go-webfinger"
-	"github.com/gorilla/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
 )
@@ -35,24 +35,17 @@ const (
 	webfingerHome = "https://webfinger.net/"
 )
 
-// logCatcher implements the io.Writer interface, writing all bytes to a string
-// slice on the underlying http.Request.
-type logCatcher struct {
-	request *http.Request
-}
-
-func (l logCatcher) Write(p []byte) (n int, err error) {
-	logs := context.Get(l.request, "logs").([]string)
-	logs = append(logs, string(p))
-	context.Set(l.request, "logs", logs)
-	return len(p), nil
-}
-
 func lookup(w http.ResponseWriter, r *http.Request) {
-	context.Set(r, "logs", []string{})
 	flags := log.Flags()
+	defer func() {
+		// reset standard logger back to normal
+		log.SetOutput(os.Stderr)
+		log.SetFlags(flags)
+	}()
+
+	logs := new(bytes.Buffer)
 	log.SetFlags(log.Ltime)
-	log.SetOutput(logCatcher{r})
+	log.SetOutput(logs)
 
 	ctx := appengine.NewContext(r)
 	client := webfinger.NewClient(urlfetch.Client(ctx))
@@ -70,25 +63,19 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error getting JRD: %v", err.Error())
 	} else {
-		bytes, err := json.MarshalIndent(j, "", "  ")
+		b, err := json.MarshalIndent(j, "", "  ")
 		if err != nil {
 			log.Printf("Error marshalling JRD: %v", err.Error())
 		} else {
-			jrd = string(bytes)
+			jrd = string(b)
 		}
 	}
-
-	// reset standard logger back to normal
-	log.SetOutput(os.Stderr)
-	log.SetFlags(flags)
-
-	logs := context.Get(r, "logs").([]string)
 
 	var data = struct {
 		Resource string
 		JRD      string
-		Logs     []string
-	}{input, jrd, logs}
+		Logs     string
+	}{input, jrd, logs.String()}
 	lookupTemplate.Execute(w, data)
 }
 

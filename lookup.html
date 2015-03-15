@@ -10,20 +10,17 @@
     <script src="/js/run_prettify.js"></script>
     <style>
       #logs {
-        font-family: monospace;
-        list-style: none;
-        padding-left: 0;
-      }
-      #logs > li {
-        padding: 0 0.5em;
+        color: #666;
       }
 
       pre {
-        white-space: pre-wrap;
+        font-size: 0.875em;
         line-height: 2;
+        white-space: pre-wrap;
       }
       pre.prettyprint {
         border: none;
+        padding: 0;
       }
     </style>
     <base href="//webfinger.net">
@@ -59,14 +56,12 @@
 
     <div id="content">
       {{ if .Logs }}
-        <h3>Request Log</h3>
-        <ul id="logs">{{range .Logs}}
-          <li>{{ . }}</li>{{end}}
-        </ul>
+        <h2>Request Log</h2>
+        <pre id="logs">{{ .Logs }}</pre>
       {{ end }}
 
       {{ if .JRD }}
-        <h3>JSON Resource Descriptor (JRD)</h3>
+        <h2>JSON Resource Descriptor (JRD)</h2>
         <pre id="jrd" class="prettyprint lang-js">{{ .JRD }}</pre>
       {{ end }}
 
