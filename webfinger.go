@@ -21,19 +21,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	webfinger "github.com/ant0ine/go-webfinger"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/urlfetch"
 )
 
-var (
-	lookupTemplate = template.Must(template.ParseFiles("lookup.html"))
-)
+const webfingerHome = "https://webfinger.net/"
 
-const (
-	webfingerHome = "https://webfinger.net/"
-)
+var lookupTemplate = template.Must(template.ParseFiles("lookup.html"))
 
 func lookup(w http.ResponseWriter, r *http.Request) {
 	flags := log.Flags()
@@ -47,9 +39,7 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 	log.SetFlags(log.Ltime)
 	log.SetOutput(logs)
 
-	ctx := appengine.NewContext(r)
-	client := webfinger.NewClient(urlfetch.Client(ctx))
-	client.AllowHTTP = true
+	client := webfingerClient(r)
 
 	var jrd string
 
@@ -61,11 +51,11 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 
 	j, err := client.Lookup(input, nil)
 	if err != nil {
-		log.Printf("Error getting JRD: %v", err.Error())
+		log.Printf("Error getting JRD: %v", err)
 	} else {
 		b, err := json.MarshalIndent(j, "", "  ")
 		if err != nil {
-			log.Printf("Error marshalling JRD: %v", err.Error())
+			log.Printf("Error marshalling JRD: %v", err)
 		} else {
 			jrd = string(b)
 		}
