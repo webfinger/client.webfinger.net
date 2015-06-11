@@ -21,27 +21,31 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 )
 
 const webfingerHome = "https://webfinger.net/"
 
-var lookupTemplate = template.Must(template.ParseFiles("lookup.html"))
+var (
+	lookupTemplate = template.Must(template.ParseFiles("lookup.html"))
+
+	// mu protects access to the log package while processing lookup requests
+	mu sync.Mutex
+)
 
 func lookup(w http.ResponseWriter, r *http.Request) {
+	mu.Lock()
 	flags := log.Flags()
 	defer func() {
 		// reset standard logger back to normal
 		log.SetOutput(os.Stderr)
 		log.SetFlags(flags)
+		mu.Unlock()
 	}()
 
 	logs := new(bytes.Buffer)
 	log.SetFlags(log.Ltime)
 	log.SetOutput(logs)
-
-	client := webfingerClient(r)
-
-	var jrd string
 
 	input := r.FormValue("resource")
 	if input == "" {
@@ -49,7 +53,9 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	j, err := client.Lookup(input, nil)
+	var jrd string
+
+	j, err := webfingerClient(r).Lookup(input, nil)
 	if err != nil {
 		log.Printf("Error getting JRD: %v", err)
 	} else {
