@@ -47,6 +47,7 @@ func main() {
 
 	wfClient = webfinger.NewClient(nil)
 	wfClient.AllowHTTP = *allowHTTP
+	wfClient.WebFistServer = ""
 
 	addr := fmt.Sprintf(":%d", *port)
 	log.Printf("Listening on %v", addr)

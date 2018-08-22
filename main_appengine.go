@@ -28,5 +28,6 @@ func webfingerClient(r *http.Request) *webfinger.Client {
 	ctx := appengine.NewContext(r)
 	client := webfinger.NewClient(urlfetch.Client(ctx))
 	client.AllowHTTP = true
+	client.WebFistServer = ""
 	return client
 }
