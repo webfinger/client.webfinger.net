@@ -1,5 +1,6 @@
-application: webfinger-client-hrd
-version: go
+# deploy using:
+#     gcloud app deploy --project=webfinger-client-hrd
+
 runtime: go
 api_version: go1
 
