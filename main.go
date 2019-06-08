@@ -25,14 +25,14 @@ import (
 	"sync"
 
 	"github.com/ant0ine/go-webfinger"
+	"github.com/ant0ine/go-webfinger/jrd"
 )
 
 var (
-	allowHTTP = flag.Bool("allow_http", false, "allow falling back to non-secure HTTP connections")
-	port      = flag.Int("port", 8080, "TCP port to listen on")
+	port = flag.Int("port", 8080, "TCP port to listen on")
 
 	// shared webfinger.Client used to process requests
-	wfClient *webfinger.Client
+	client *webfinger.Client
 
 	// mu protects access to the log package while processing lookup requests
 	mu sync.Mutex
@@ -42,16 +42,11 @@ func init() {
 	http.HandleFunc("/", lookup)
 }
 
-func webfingerClient(_ *http.Request) *webfinger.Client {
-	return wfClient
-}
-
 func main() {
 	flag.Parse()
 
-	wfClient = webfinger.NewClient(nil)
-	wfClient.AllowHTTP = *allowHTTP
-	wfClient.WebFistServer = ""
+	client = webfinger.NewClient(nil)
+	client.WebFistServer = ""
 
 	addr := fmt.Sprintf(":%d", *port)
 	log.Printf("Listening on %v", addr)
@@ -68,36 +63,28 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 
 	mu.Lock()
 	flags := log.Flags()
-	defer func() {
-		// reset standard logger back to normal
-		log.SetOutput(os.Stderr)
-		log.SetFlags(flags)
-		mu.Unlock()
-	}()
-
 	logs := new(bytes.Buffer)
 	log.SetFlags(log.Ltime)
 	log.SetOutput(logs)
 
-	var jrd string
+	j, err := client.Lookup(input, nil)
 
-	j, err := webfingerClient(r).Lookup(input, nil)
+	// reset standard logger back to normal
+	log.SetOutput(os.Stderr)
+	log.SetFlags(flags)
+	mu.Unlock()
+
 	if err != nil {
-		log.Printf("Error getting JRD: %v", err)
-	} else {
-		b, err := json.MarshalIndent(j, "", "  ")
-		if err != nil {
-			log.Printf("Error marshalling JRD: %v", err)
-		} else {
-			jrd = string(b)
-		}
+		msg := fmt.Sprintf("Error getting JRD: %v", err)
+		log.Print(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
 	}
 
 	var data = struct {
-		Resource string
-		JRD      string
-		Logs     string
-	}{input, jrd, logs.String()}
+		Resource string   `json:"resource"`
+		JRD      *jrd.JRD `json:"jrd"`
+		Logs     string   `json:"logs"`
+	}{input, j, logs.String()}
 
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
