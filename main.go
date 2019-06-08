@@ -15,10 +15,14 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"sync"
 
 	"github.com/ant0ine/go-webfinger"
 )
@@ -29,7 +33,14 @@ var (
 
 	// shared webfinger.Client used to process requests
 	wfClient *webfinger.Client
+
+	// mu protects access to the log package while processing lookup requests
+	mu sync.Mutex
 )
+
+func init() {
+	http.HandleFunc("/", lookup)
+}
 
 func webfingerClient(_ *http.Request) *webfinger.Client {
 	return wfClient
@@ -46,4 +57,49 @@ func main() {
 	log.Printf("Listening on %v", addr)
 
 	log.Fatal(http.ListenAndServe(addr, nil))
+}
+
+func lookup(w http.ResponseWriter, r *http.Request) {
+	input := r.FormValue("resource")
+	if input == "" {
+		http.Error(w, "empty resource", http.StatusBadRequest)
+		return
+	}
+
+	mu.Lock()
+	flags := log.Flags()
+	defer func() {
+		// reset standard logger back to normal
+		log.SetOutput(os.Stderr)
+		log.SetFlags(flags)
+		mu.Unlock()
+	}()
+
+	logs := new(bytes.Buffer)
+	log.SetFlags(log.Ltime)
+	log.SetOutput(logs)
+
+	var jrd string
+
+	j, err := webfingerClient(r).Lookup(input, nil)
+	if err != nil {
+		log.Printf("Error getting JRD: %v", err)
+	} else {
+		b, err := json.MarshalIndent(j, "", "  ")
+		if err != nil {
+			log.Printf("Error marshalling JRD: %v", err)
+		} else {
+			jrd = string(b)
+		}
+	}
+
+	var data = struct {
+		Resource string
+		JRD      string
+		Logs     string
+	}{input, jrd, logs.String()}
+
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	enc.Encode(data)
 }
