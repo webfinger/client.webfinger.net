@@ -17,23 +17,24 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"sync"
 )
 
-const webfingerHome = "https://webfinger.net/"
-
 var (
-	lookupTemplate = template.Must(template.ParseFiles("lookup.html"))
-
 	// mu protects access to the log package while processing lookup requests
 	mu sync.Mutex
 )
 
 func lookup(w http.ResponseWriter, r *http.Request) {
+	input := r.FormValue("resource")
+	if input == "" {
+		http.Error(w, "empty resource", http.StatusBadRequest)
+		return
+	}
+
 	mu.Lock()
 	flags := log.Flags()
 	defer func() {
@@ -46,12 +47,6 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 	logs := new(bytes.Buffer)
 	log.SetFlags(log.Ltime)
 	log.SetOutput(logs)
-
-	input := r.FormValue("resource")
-	if input == "" {
-		http.Redirect(w, r, webfingerHome, http.StatusFound)
-		return
-	}
 
 	var jrd string
 
@@ -72,13 +67,12 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 		JRD      string
 		Logs     string
 	}{input, jrd, logs.String()}
-	lookupTemplate.Execute(w, data)
+
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	enc.Encode(data)
 }
 
 func init() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// redirect "/" to webfinger.net
-		http.Redirect(w, r, webfingerHome, http.StatusFound)
-	})
-	http.HandleFunc("/lookup", lookup)
+	http.HandleFunc("/", lookup)
 }

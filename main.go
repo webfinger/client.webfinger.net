@@ -31,11 +31,6 @@ var (
 	wfClient *webfinger.Client
 )
 
-func init() {
-	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css"))))
-	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("js"))))
-}
-
 func webfingerClient(_ *http.Request) *webfinger.Client {
 	return wfClient
 }
