@@ -52,9 +52,7 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 
 	jrd, err := client.Lookup(resource, nil)
 	if err != nil {
-		msg := fmt.Sprintf("Error getting JRD: %v", err)
-		log.Print(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
+		client.Logger.Printf("Error getting JRD: %v", err)
 	}
 
 	var data = struct {
@@ -63,6 +61,7 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 		Logs     string         `json:"logs"`
 	}{resource, jrd, logs.String()}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	enc.Encode(data)
