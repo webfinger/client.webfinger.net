@@ -61,7 +61,7 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 		Logs     string         `json:"logs"`
 	}{resource, jrd, logs.String()}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "https://webfinger.net")
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	enc.Encode(data)
