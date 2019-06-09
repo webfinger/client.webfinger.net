@@ -21,32 +21,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"sync"
 
-	"github.com/ant0ine/go-webfinger"
-	"github.com/ant0ine/go-webfinger/jrd"
+	"webfinger.net/go/webfinger"
 )
 
 var (
 	port = flag.Int("port", 8080, "TCP port to listen on")
-
-	// shared webfinger.Client used to process requests
-	client *webfinger.Client
-
-	// mu protects access to the log package while processing lookup requests
-	mu sync.Mutex
 )
-
-func init() {
-	http.HandleFunc("/", lookup)
-}
 
 func main() {
 	flag.Parse()
-
-	client = webfinger.NewClient(nil)
-	client.WebFistServer = ""
+	http.HandleFunc("/", lookup)
 
 	addr := fmt.Sprintf(":%d", *port)
 	log.Printf("Listening on %v", addr)
@@ -55,25 +40,17 @@ func main() {
 }
 
 func lookup(w http.ResponseWriter, r *http.Request) {
-	input := r.FormValue("resource")
-	if input == "" {
-		http.Error(w, "empty resource", http.StatusBadRequest)
+	client := webfinger.NewClient(nil)
+	logs := new(bytes.Buffer)
+	client.Logger = log.New(logs, "", log.Ltime)
+
+	resource := r.FormValue("resource")
+	if resource == "" {
+		fmt.Fprint(w, "OK")
 		return
 	}
 
-	mu.Lock()
-	flags := log.Flags()
-	logs := new(bytes.Buffer)
-	log.SetFlags(log.Ltime)
-	log.SetOutput(logs)
-
-	j, err := client.Lookup(input, nil)
-
-	// reset standard logger back to normal
-	log.SetOutput(os.Stderr)
-	log.SetFlags(flags)
-	mu.Unlock()
-
+	jrd, err := client.Lookup(resource, nil)
 	if err != nil {
 		msg := fmt.Sprintf("Error getting JRD: %v", err)
 		log.Print(msg)
@@ -81,10 +58,10 @@ func lookup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data = struct {
-		Resource string   `json:"resource"`
-		JRD      *jrd.JRD `json:"jrd"`
-		Logs     string   `json:"logs"`
-	}{input, j, logs.String()}
+		Resource string         `json:"resource"`
+		JRD      *webfinger.JRD `json:"jrd"`
+		Logs     string         `json:"logs"`
+	}{resource, jrd, logs.String()}
 
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
