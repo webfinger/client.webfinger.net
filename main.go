@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"webfinger.net/go/webfinger"
 )
@@ -40,15 +41,23 @@ func main() {
 }
 
 func lookup(w http.ResponseWriter, r *http.Request) {
-	client := webfinger.NewClient(nil)
-	logs := new(bytes.Buffer)
-	client.Logger = log.New(logs, "", log.Ltime)
-
 	resource := r.FormValue("resource")
 	if resource == "" {
 		fmt.Fprint(w, "OK")
 		return
 	}
+
+	// redirect old lookup URL to webfinger.net
+	if strings.HasPrefix(r.URL.Path, "/lookup") {
+		u := *r.URL
+		u.Host = "webfinger.net"
+		http.Redirect(w, r, u.String(), http.StatusFound)
+		return
+	}
+
+	client := webfinger.NewClient(nil)
+	logs := new(bytes.Buffer)
+	client.Logger = log.New(logs, "", log.Ltime)
 
 	jrd, err := client.Lookup(resource, nil)
 	if err != nil {
