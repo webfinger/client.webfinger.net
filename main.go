@@ -21,20 +21,22 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"webfinger.net/go/webfinger"
-)
-
-var (
-	port = flag.Int("port", 8080, "TCP port to listen on")
 )
 
 func main() {
 	flag.Parse()
 	http.HandleFunc("/", lookup)
 
-	addr := fmt.Sprintf(":%d", *port)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	addr := fmt.Sprintf(":%s", port)
 	log.Printf("Listening on %v", addr)
 
 	log.Fatal(http.ListenAndServe(addr, nil))
