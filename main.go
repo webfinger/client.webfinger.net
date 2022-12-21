@@ -43,7 +43,7 @@ func main() {
 }
 
 func lookup(w http.ResponseWriter, r *http.Request) {
-	resource := r.FormValue("resource")
+	resource := strings.TrimSpace(r.FormValue("resource"))
 	if resource == "" {
 		fmt.Fprint(w, "OK")
 		return
