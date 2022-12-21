@@ -1,7 +1,8 @@
-FROM golang:1.12 as builder
+# syntax=docker/dockerfile:1.4
+FROM cgr.dev/chainguard/go:latest as build
+LABEL maintainer="Will Norris <will@willnorris.com>"
 
-WORKDIR /app
-
+WORKDIR /work
 COPY go.mod go.sum ./
 RUN go mod download
 
@@ -9,10 +10,8 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o webfinger
 
-FROM alpine
-RUN apk add --no-cache ca-certificates
+FROM cgr.dev/chainguard/static:latest
 
-# Copy the binary to the production image from the builder stage.
-COPY --from=builder /app/webfinger /app/webfinger
+COPY --from=build /work/webfinger /webfinger
 
-CMD ["/app/webfinger"]
+CMD ["/webfinger"]
