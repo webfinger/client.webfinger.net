@@ -1,6 +1,9 @@
+github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 webfinger.net/go/webfinger v0.1.0 h1:e/J18UgjFE8+ZbKxzKm4+gv4ehidNnF6hcbHwS3K63U=
 webfinger.net/go/webfinger v0.1.0/go.mod h1:+najbdnIKfnKo68tU2TF+AXm8/MOqLYXqx22j8Xw7FM=
 webfinger.net/go/webfinger v0.1.1-0.20221027183439-c2788e6cdb34 h1:QhYXZSCW2jPuo3dg2nx4LZ1YwpxIM+eprohHGHx3CQw=
 webfinger.net/go/webfinger v0.1.1-0.20221027183439-c2788e6cdb34/go.mod h1:+najbdnIKfnKo68tU2TF+AXm8/MOqLYXqx22j8Xw7FM=
 webfinger.net/go/webfinger v0.1.1-0.20221220010549-78ebbb23ea95 h1:7eS/dtJSzan/v6dIl+pisFazygnlz2S/aUlY3x2m6r4=
 webfinger.net/go/webfinger v0.1.1-0.20221220010549-78ebbb23ea95/go.mod h1:+najbdnIKfnKo68tU2TF+AXm8/MOqLYXqx22j8Xw7FM=
+webfinger.net/go/webfinger v0.1.1-0.20221221033936-96ea8c8fe094 h1:oPe53CNm5zRlYVd4+swvOPt/KwKBquDrz+Ary2cfjdg=
+webfinger.net/go/webfinger v0.1.1-0.20221221033936-96ea8c8fe094/go.mod h1:/XTntpZi/7CO2vsUMrYFLbF9YG8kHCJ1uJ2xpBqsj9c=
