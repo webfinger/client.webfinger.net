@@ -7,3 +7,5 @@ webfinger.net/go/webfinger v0.1.1-0.20221220010549-78ebbb23ea95 h1:7eS/dtJSzan/v
 webfinger.net/go/webfinger v0.1.1-0.20221220010549-78ebbb23ea95/go.mod h1:+najbdnIKfnKo68tU2TF+AXm8/MOqLYXqx22j8Xw7FM=
 webfinger.net/go/webfinger v0.1.1-0.20221221033936-96ea8c8fe094 h1:oPe53CNm5zRlYVd4+swvOPt/KwKBquDrz+Ary2cfjdg=
 webfinger.net/go/webfinger v0.1.1-0.20221221033936-96ea8c8fe094/go.mod h1:/XTntpZi/7CO2vsUMrYFLbF9YG8kHCJ1uJ2xpBqsj9c=
+webfinger.net/go/webfinger v0.1.1-0.20221223182144-746101f2fca8 h1:ik30VPsxU9zY4JwdwdYZa78NhiolUMIDptJ5Zds1S6w=
+webfinger.net/go/webfinger v0.1.1-0.20221223182144-746101f2fca8/go.mod h1:/XTntpZi/7CO2vsUMrYFLbF9YG8kHCJ1uJ2xpBqsj9c=
