@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o webfinger
+RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -v -o webfinger
 
 FROM cgr.dev/chainguard/static:latest
 
